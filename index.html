@@ -26,9 +26,28 @@
             border-radius: 4px;
             border: 2px solid #0f0f0f;
         }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 9999px;
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+            text-align: center;
+        }
+        .message-box.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="p-0">
+    <div id="message-box" class="message-box"></div>
 
     <!-- Navigačná lišta (simulácia hlavičky YouTube) -->
     <header class="flex items-center justify-between py-4 px-6 bg-[#0f0f0f] sticky top-0 z-50 border-b border-gray-800">
@@ -125,6 +144,15 @@
         
         let userId;
 
+        function showMessage(message) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = message;
+            msgBox.classList.add('show');
+            setTimeout(() => {
+                msgBox.classList.remove('show');
+            }, 3000);
+        }
+
         // Nastavenie prvotnej autentifikácie
         async function signIn() {
             try {
@@ -194,13 +222,14 @@
             if (finalUrl.trim().startsWith('<iframe')) {
                 finalUrl = extractSrcFromIframe(finalUrl);
                 if (!finalUrl) {
-                    console.error("Neplatný HTML kód iframe.");
+                    showMessage("Neplatný HTML kód iframe.");
                     return;
                 }
             }
 
             const videoId = extractVideoId(finalUrl);
             if (!videoId) {
+                showMessage("Neplatná URL pre YouTube video. Skúste iný odkaz.");
                 console.error("Neplatná URL pre YouTube video.");
                 return;
             }
@@ -225,6 +254,7 @@
                 console.log("Video úspešne pridané s ID: ", docRef.id);
             } catch (e) {
                 console.error("Chyba pri pridávaní dokumentu: ", e);
+                showMessage("Chyba pri pridávaní videa. Skúste to znova.");
             }
         }
 
@@ -277,6 +307,8 @@
             if (url) {
                 addVideo(url);
                 document.getElementById('video-url-input').value = '';
+            } else {
+                showMessage("Pole pre URL je prázdne.");
             }
         });
 
@@ -286,3 +318,5 @@
     </script>
 </body>
 </html>
+
+
