@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> MojeTube Pro</title>
+    <title>MojeTube Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -11,7 +11,6 @@
             font-family: 'Roboto', sans-serif;
             background-color: #0f0f0f;
             color: #f1f1f1;
-            /* Prispôsobený scrollbar pre konzistentný vzhľad */
             scrollbar-width: thin;
             scrollbar-color: #3e3e3e #0f0f0f;
         }
@@ -114,10 +113,16 @@
 
         <!-- Hlavný obsah (mriežka videí) -->
         <main class="flex-1 p-4 md:p-8">
-            <h2 class="text-xl font-bold mb-4">Pridajte YouTube video</h2>
-            <div class="flex items-center space-x-4 mb-8">
-                <input id="video-url-input" type="text" placeholder="Vložiť URL z YouTube" class="w-full bg-[#1e1e1e] text-[#f1f1f1] border border-[#3e3e3e] rounded-full py-2 px-4 focus:outline-none focus:border-blue-500">
-                <button id="add-video-btn" class="bg-red-600 text-white font-semibold rounded-full px-4 py-2 hover:bg-red-700 transition-colors">Pridať</button>
+            <h2 class="text-xl font-bold mb-4">Herné videá z YouTube</h2>
+
+            <!-- Ovládanie pridávania videí -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="startAddingButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full transition-colors">
+                    Spustiť pridávanie videí
+                </button>
+                <button id="stopAddingButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full transition-colors">
+                    Zastaviť pridávanie videí
+                </button>
             </div>
             
             <div id="videos-container" class="flex flex-col items-center space-y-6">
@@ -143,6 +148,7 @@
         const auth = getAuth(app);
         
         let userId;
+        let videoInterval;
 
         function showMessage(message) {
             const msgBox = document.getElementById('message-box');
@@ -164,23 +170,11 @@
                 userId = auth.currentUser.uid;
                 console.log("Používateľ prihlásený. ID:", userId);
                 setupRealtimeListener();
+                startAddingVideos(); // Automaticky spustíme pridávanie videí na začiatku
             } catch (error) {
                 console.error("Chyba pri autentifikácii:", error);
+                showMessage("Chyba pri prihlasovaní. Skúste to znova.");
             }
-        }
-
-        // Funkcia na extrahovanie src z iframe
-        function extractSrcFromIframe(htmlString) {
-            const regex = /<iframe[^>]+src="([^"]+)"/;
-            const match = htmlString.match(regex);
-            return match ? match[1] : null;
-        }
-
-        // Funkcia na extrahovanie ID z URL
-        function extractVideoId(url) {
-            const regex = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/;
-            const match = url.match(regex);
-            return match ? match[1] : null;
         }
         
         // Funkcia na formátovanie veľkých čísel
@@ -197,66 +191,60 @@
             return num;
         }
 
-        // Funkcia na generovanie náhodného názvu videa
-        function generateVideoTitle() {
-            const videoTitles = [
-                "10 neuveriteľných faktov o vesmíre",
-                "Ako som postavil svoj domov snov za 30 dní",
-                "Najlepšie cvičenia pre začiatočníkov na doma",
-                "Recenzia nového iPhone 15 Pro Max",
-                "Cestovanie po Taliansku: Od Ríma po Toskánsko",
-                "5 tipov, ako sa stať majstrom v hre Call of Duty",
-                "Čo by ste mali vedieť pred kúpou auta",
-                "Najlepšie recepty na grilovanie tohto leta",
-                "História Star Wars, ktorú nepoznáte",
-                "Exkluzívny rozhovor s Elon Muskom"
-            ];
-            const randomIndex = Math.floor(Math.random() * videoTitles.length);
-            return videoTitles[randomIndex];
-        }
+        // Zoznam herných videí a ich autorov
+        const gamingVideos = [
+            { videoId: "L2W_tfeMsF0", channel: "FiFqo", title: "TO PRED SMRŤOU - Life: The Game" },
+            { videoId: "6pgiAO5h8I8", channel: "Bax", title: "I Asked 20,000 People To Make Me A Roblox Game.." },
+            { videoId: "9MvcxIXKDUc", channel: "SirYakari", title: "Přežil jsem 100 DNÍ v Hororovém Minecraftu.. [CELÝ FILM]" },
+            { videoId: "C1ObitoLwhM", channel: "PewDiePie", title: "Trap Adventure 2 - WHO MADE THIS GAME AND WHY 😡😡? ! " },
+            { videoId: "C8UL5v9X8vI", channel: "Markiplier", title: "SATISFACTION: THE GAME | A Little to the Left" },
+            { videoId: "MFJZoh3d2rU", channel: "jacksepticeye", title: "The Funniest Game I've Ever Played" },
+        ];
 
-        // Funkcia na pridanie videa do databázy
-        async function addVideo(url) {
-            let finalUrl = url;
-            // Ak je vstupom iframe kód, najprv extrahujeme URL
-            if (finalUrl.trim().startsWith('<iframe')) {
-                finalUrl = extractSrcFromIframe(finalUrl);
-                if (!finalUrl) {
-                    showMessage("Neplatný HTML kód iframe.");
-                    return;
-                }
-            }
-
-            const videoId = extractVideoId(finalUrl);
-            if (!videoId) {
-                showMessage("Neplatná URL pre YouTube video. Skúste iný odkaz.");
-                console.error("Neplatná URL pre YouTube video.");
-                return;
-            }
-
-            // Dynamicky generované hodnoty
-            const channelNames = ["Gaming Master", "Tech Expert", "Music Vibe", "History Channel Pro", "Art of Living"];
-            const views = Math.floor(Math.random() * (2000000000 - 1000000) + 1000000); // 1 milión - 2 miliardy
-            const subscribers = Math.floor(Math.random() * (10000000 - 100000) + 100000); // 100 tisíc - 10 miliónov
+        // Funkcia na náhodné vybratie a pridanie videa
+        async function addRandomVideo() {
+            const randomVideo = gamingVideos[Math.floor(Math.random() * gamingVideos.length)];
+            const views = Math.floor(Math.random() * (2000000000 - 1000000) + 1000000); 
             const randomDays = Math.floor(Math.random() * 365) + 1;
             const publishedTime = `pred ${randomDays} dňami`;
 
             try {
-                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/youtube_videos`), {
-                    videoId: videoId,
-                    title: generateVideoTitle(), 
-                    channel: channelNames[Math.floor(Math.random() * channelNames.length)],
+                await addDoc(collection(db, `/artifacts/${appId}/public/data/youtube_videos`), {
+                    videoId: randomVideo.videoId,
+                    title: randomVideo.title,
+                    channel: randomVideo.channel,
                     views: views,
-                    subscribers: subscribers,
                     publishedTime: publishedTime,
                     timestamp: serverTimestamp()
                 });
-                console.log("Video úspešne pridané s ID: ", docRef.id);
+                console.log("Video úspešne pridané do databázy.");
             } catch (e) {
                 console.error("Chyba pri pridávaní dokumentu: ", e);
                 showMessage("Chyba pri pridávaní videa. Skúste to znova.");
             }
         }
+        
+        // Funkcie na ovládanie pridávania videí
+        function startAddingVideos() {
+            if (!videoInterval) {
+                // Spusti pridanie videa hneď a potom každých 5 sekúnd
+                addRandomVideo();
+                videoInterval = setInterval(addRandomVideo, 5000);
+            }
+        }
+
+        function stopAddingVideos() {
+            if (videoInterval) {
+                clearInterval(videoInterval);
+                videoInterval = null;
+                showMessage("Pridávanie videí bolo zastavené.");
+            }
+        }
+
+        // Priradenie funkcií k tlačidlám
+        document.getElementById('startAddingButton').addEventListener('click', startAddingVideos);
+        document.getElementById('stopAddingButton').addEventListener('click', stopAddingVideos);
+
 
         // Funkcia na vykreslenie videí na stránke
         function renderVideos(videos) {
@@ -296,27 +284,17 @@
                     videos.push({ id: doc.id, ...doc.data() });
                 });
                 // Sort by timestamp in descending order (newest first)
-                videos.sort((a, b) => b.timestamp - a.timestamp);
+                videos.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
                 renderVideos(videos);
             });
         }
-
-        // Pridanie poslucháča na tlačidlo
-        document.getElementById('add-video-btn').addEventListener('click', () => {
-            const url = document.getElementById('video-url-input').value;
-            if (url) {
-                addVideo(url);
-                document.getElementById('video-url-input').value = '';
-            } else {
-                showMessage("Pole pre URL je prázdne.");
-            }
-        });
-
+        
         // Spustenie autentifikácie pri načítaní stránky
         signIn();
-        
     </script>
 </body>
 </html>
+
+
 
 
