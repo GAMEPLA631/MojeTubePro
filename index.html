@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> MojeTube Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0f0f0f;
+            color: #f1f1f1;
+            /* Prispôsobený scrollbar pre konzistentný vzhľad */
+            scrollbar-width: thin;
+            scrollbar-color: #3e3e3e #0f0f0f;
+        }
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+        body::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+        body::-webkit-scrollbar-thumb {
+            background-color: #3e3e3e;
+            border-radius: 4px;
+            border: 2px solid #0f0f0f;
+        }
+    </style>
+</head>
+<body class="p-0">
+
+    <!-- Navigačná lišta (simulácia hlavičky YouTube) -->
+    <header class="flex items-center justify-between py-4 px-6 bg-[#0f0f0f] sticky top-0 z-50 border-b border-gray-800">
+        <!-- Ľavá časť -->
+        <div class="flex items-center space-x-2">
+            <!-- Ikona menu -->
+            <svg class="w-6 h-6 text-[#f1f1f1] cursor-pointer hover:text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
+            <!-- Logo YouTube -->
+            <div class="flex items-center space-x-1 ml-4">
+                <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M21.75 6.059c-.214-.816-.856-1.458-1.672-1.672C18.667 4 12 4 12 4s-6.667 0-8.078.387c-.816.214-1.458.856-1.672 1.672C2 7.42 2 12 2 12s0 4.58.387 6.059c.214.816.856 1.458 1.672 1.672C5.333 20 12 20 12 20s6.667 0 8.078-.387c.816-.214 1.458-.856 1.672-1.672C22 16.58 22 12 22 12s0-4.58-.25-5.941zM9.75 15.5V8.5L15 12l-5.25 3.5z"></path></svg>
+                <span class="text-xl font-bold">MojeTube Pro</span>
+            </div>
+        </div>
+
+        <!-- Stredná časť: Vyhľadávací panel -->
+        <div class="flex-1 max-w-2xl mx-6 hidden sm:flex items-center">
+            <input type="text" placeholder="Vyhľadať" class="w-full bg-[#1e1e1e] text-[#f1f1f1] border border-[#3e3e3e] rounded-l-full py-2 px-4 focus:outline-none focus:border-blue-500">
+            <button class="bg-[#2e2e2e] text-[#f1f1f1] rounded-r-full px-4 py-2 border border-[#3e3e3e] border-l-0 hover:bg-[#3e2e2e] transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 17 9.5 6.5 6.5 0 1 0 10.5 17a6.471 6.471 0 0 0 3.73-1.28l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+            </button>
+        </div>
+        
+        <!-- Pravá časť: Ikony používateľa -->
+        <div class="flex items-center space-x-4">
+            <svg class="w-6 h-6 text-[#f1f1f1] hidden sm:block cursor-pointer hover:text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.25 15.5l-2.25-2.25V9h-3v4.25L9.75 15.5H8.5L12 19.5l3.5-4z"></path></svg>
+            <svg class="w-6 h-6 text-[#f1f1f1] hidden sm:block cursor-pointer hover:text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 4.36 6 6.93 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.21 1.79-4 4-4s4 1.79 4 4v6z"></path></svg>
+            <div class="w-9 h-9 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold text-gray-800 cursor-pointer">
+                M
+            </div>
+        </div>
+    </header>
+
+    <!-- Hlavný kontajner pre rozloženie (sidebar a hlavný obsah) -->
+    <div class="flex">
+        <!-- Bočný navigačný panel (Sidebar) -->
+        <aside class="w-64 bg-[#0f0f0f] p-4 hidden lg:block sticky top-0 h-screen overflow-y-auto">
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg bg-[#2e2e2e] hover:bg-[#3e3e3e] transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
+                    <span class="font-medium">Domov</span>
+                </a>
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-[#2e2e2e] transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z"></path></svg>
+                    <span class="font-medium">Shorts</span>
+                </a>
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-[#2e2e2e] transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm-2 13.5l-3-3 1.41-1.41 1.59 1.59 4.59-4.59 1.41 1.41-6 6z"></path></svg>
+                    <span class="font-medium">Odbery</span>
+                </a>
+            </nav>
+            <hr class="border-gray-700 my-4">
+            <nav class="space-y-2">
+                <p class="text-sm font-semibold text-gray-500 uppercase ml-2">Vy</p>
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-[#2e2e2e] transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 6v8H8V6h8zm0-2h-8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"></path></svg>
+                    <span class="font-medium">História</span>
+                </a>
+                <a href="#" class="flex items-center space-x-4 p-2 rounded-lg hover:bg-[#2e2e2e] transition-colors">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8 3.59 8 8 8zm-2.29-9.52l4.98-2.61a.5.5 0 0 1 .68.45v5.33a.5.5 0 0 1-.68.45l-4.98-2.61a.5.5 0 0 1 0-.85z"></path></svg>
+                    <span class="font-medium">Neskôr pozrieť</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Hlavný obsah (mriežka videí) -->
+        <main class="flex-1 p-4 md:p-8">
+            <h2 class="text-xl font-bold mb-4">Pridajte YouTube video</h2>
+            <div class="flex items-center space-x-4 mb-8">
+                <input id="video-url-input" type="text" placeholder="Vložiť URL z YouTube" class="w-full bg-[#1e1e1e] text-[#f1f1f1] border border-[#3e3e3e] rounded-full py-2 px-4 focus:outline-none focus:border-blue-500">
+                <button id="add-video-btn" class="bg-red-600 text-white font-semibold rounded-full px-4 py-2 hover:bg-red-700 transition-colors">Pridať</button>
+            </div>
+            
+            <div id="videos-container" class="flex flex-col items-center space-y-6">
+                <!-- Videá sa tu dynamicky pridávajú pomocou JavaScriptu -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK skripty -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Kontrola, či existujú globálne premenné z Canvas prostredia
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Inicializácia Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        let userId;
+
+        // Nastavenie prvotnej autentifikácie
+        async function signIn() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser.uid;
+                console.log("Používateľ prihlásený. ID:", userId);
+                setupRealtimeListener();
+            } catch (error) {
+                console.error("Chyba pri autentifikácii:", error);
+            }
+        }
+
+        // Funkcia na extrahovanie src z iframe
+        function extractSrcFromIframe(htmlString) {
+            const regex = /<iframe[^>]+src="([^"]+)"/;
+            const match = htmlString.match(regex);
+            return match ? match[1] : null;
+        }
+
+        // Funkcia na extrahovanie ID z URL
+        function extractVideoId(url) {
+            const regex = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+        
+        // Funkcia na formátovanie veľkých čísel
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1) + ' mld';
+            }
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + ' mil';
+            }
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + ' tis';
+            }
+            return num;
+        }
+
+        // Funkcia na generovanie náhodného názvu videa
+        function generateVideoTitle() {
+            const videoTitles = [
+                "10 neuveriteľných faktov o vesmíre",
+                "Ako som postavil svoj domov snov za 30 dní",
+                "Najlepšie cvičenia pre začiatočníkov na doma",
+                "Recenzia nového iPhone 15 Pro Max",
+                "Cestovanie po Taliansku: Od Ríma po Toskánsko",
+                "5 tipov, ako sa stať majstrom v hre Call of Duty",
+                "Čo by ste mali vedieť pred kúpou auta",
+                "Najlepšie recepty na grilovanie tohto leta",
+                "História Star Wars, ktorú nepoznáte",
+                "Exkluzívny rozhovor s Elon Muskom"
+            ];
+            const randomIndex = Math.floor(Math.random() * videoTitles.length);
+            return videoTitles[randomIndex];
+        }
+
+        // Funkcia na pridanie videa do databázy
+        async function addVideo(url) {
+            let finalUrl = url;
+            // Ak je vstupom iframe kód, najprv extrahujeme URL
+            if (finalUrl.trim().startsWith('<iframe')) {
+                finalUrl = extractSrcFromIframe(finalUrl);
+                if (!finalUrl) {
+                    console.error("Neplatný HTML kód iframe.");
+                    return;
+                }
+            }
+
+            const videoId = extractVideoId(finalUrl);
+            if (!videoId) {
+                console.error("Neplatná URL pre YouTube video.");
+                return;
+            }
+
+            // Dynamicky generované hodnoty
+            const channelNames = ["Gaming Master", "Tech Expert", "Music Vibe", "History Channel Pro", "Art of Living"];
+            const views = Math.floor(Math.random() * (2000000000 - 1000000) + 1000000); // 1 milión - 2 miliardy
+            const subscribers = Math.floor(Math.random() * (10000000 - 100000) + 100000); // 100 tisíc - 10 miliónov
+            const randomDays = Math.floor(Math.random() * 365) + 1;
+            const publishedTime = `pred ${randomDays} dňami`;
+
+            try {
+                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/youtube_videos`), {
+                    videoId: videoId,
+                    title: generateVideoTitle(), 
+                    channel: channelNames[Math.floor(Math.random() * channelNames.length)],
+                    views: views,
+                    subscribers: subscribers,
+                    publishedTime: publishedTime,
+                    timestamp: serverTimestamp()
+                });
+                console.log("Video úspešne pridané s ID: ", docRef.id);
+            } catch (e) {
+                console.error("Chyba pri pridávaní dokumentu: ", e);
+            }
+        }
+
+        // Funkcia na vykreslenie videí na stránke
+        function renderVideos(videos) {
+            const container = document.getElementById('videos-container');
+            container.innerHTML = '';
+            
+            videos.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.classList.add('flex', 'flex-col', 'space-y-2', 'cursor-pointer', 'w-full', 'max-w-4xl');
+                
+                // Karta videa
+                videoCard.innerHTML = `
+                    <div class="relative w-full aspect-video bg-gray-700 rounded-xl overflow-hidden">
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/${video.videoId}?si=1AcBnPltJvqzdSj5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="flex space-x-3">
+                        <div class="w-9 h-9 bg-gray-500 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-semibold text-gray-800">${video.channel.substring(0, 2).toUpperCase()}</div>
+                        <div class="flex-1">
+                            <h3 class="text-base font-semibold line-clamp-2">${video.title}</h3>
+                            <p class="text-sm text-gray-400">${video.channel}</p>
+                            <p class="text-xs text-gray-500">${formatNumber(video.views)} zhliadnutí • ${video.publishedTime}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(videoCard);
+            });
+        }
+        
+        // Nastavenie poslucháča na zmeny v databáze v reálnom čase
+        function setupRealtimeListener() {
+            const videoCollection = collection(db, `/artifacts/${appId}/public/data/youtube_videos`);
+            const q = query(videoCollection);
+
+            onSnapshot(q, (querySnapshot) => {
+                const videos = [];
+                querySnapshot.forEach((doc) => {
+                    videos.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by timestamp in descending order (newest first)
+                videos.sort((a, b) => b.timestamp - a.timestamp);
+                renderVideos(videos);
+            });
+        }
+
+        // Pridanie poslucháča na tlačidlo
+        document.getElementById('add-video-btn').addEventListener('click', () => {
+            const url = document.getElementById('video-url-input').value;
+            if (url) {
+                addVideo(url);
+                document.getElementById('video-url-input').value = '';
+            }
+        });
+
+        // Spustenie autentifikácie pri načítaní stránky
+        signIn();
+        
+    </script>
+</body>
+</html>
